@@ -21,11 +21,10 @@ server.post('/api/messages', connector.listen());
 var bot = new builder.UniversalBot(connector, [
     function (session) {
         session.beginDialog("root");
-    },
-    function (session) {
-        session.endConversation("Goodbye!");
     }
 ]);
+
+bot.endConversationAction('endConversation', 'Goodbye!', { matches: /^exit/i });
 
 bot.dialog("root", [
     function (session) {
