@@ -18,38 +18,39 @@ var bot = new builder.UniversalBot(connector, function (session) {
     // More information here: https://docs.microsoft.com/en-us/bot-framework/nodejs/bot-builder-nodejs-use-default-message-handler
     session.send("Hello Bot!");
 
+    // Another way to send text messages
+    var messageWithText = new builder.Message(session)
+        .text("Hello again bot");
+
+    session.send(messageWithText);
+
     // Getting the message sent by the user
     session.send("Message Received: %s", session.message.text);
 
     // Message with attachment(s)
     // More information here: https://docs.microsoft.com/en-us/bot-framework/nodejs/bot-builder-nodejs-send-receive-attachments
-    session.send({
-        text: "This is a message with an image attachment.",
+    var imageAttachment = {
+        contentType: "image/jpeg",
+        contentUrl: "https://secure.meetupstatic.com/photos/event/a/c/d/8/600_456464248.jpeg",
+        name: "Simple Image Attachment"
+    };
 
-        attachments: [
-            {
-                contentType: "image/jpeg",
-                contentUrl: "https://secure.meetupstatic.com/photos/event/a/c/d/8/600_456464248.jpeg",
-                name: "Simple Image Attachment"
-            }
-        ]
-    });
+    var messageWithImageAttachment = new builder.Message(session)
+        .text("This is a message with an image attachment.")
+        .addAttachment(imageAttachment);
+
+    session.send(messageWithImageAttachment);
 
     // Getting the attachments sent by the user
     var attachments = session.message.attachments;
     if (attachments && attachments.length > 0) {
-        var attachment = attachments[0];
+        var userAttachment = attachments[0];
 
-        session.send({
-            text: "You sent the following attachment:",
-            attachments: [
-                {
-                    contentType: attachment.contentType,
-                    contentUrl: attachment.contentUrl,
-                    name: attachment.name
-                }
-            ]
-        });
+        var messageWithUserAttachment = new builder.Message(session)
+            .text("You sent the following attachment:")
+            .addAttachment(userAttachment);
+
+        session.send(message);
     }
 
     // Message with Cards attachments
@@ -67,42 +68,43 @@ var bot = new builder.UniversalBot(connector, function (session) {
     session.send(messageWithHeroCard);
 
     // Message with a carousel of cards
-    var card1 = new builder.HeroCard(session)
-        .title("Card 1")
-        .subtitle("This is the first card.")
-        .text("Hello cards!")
-        .images([builder.CardImage.create(session, "https://secure.meetupstatic.com/photos/event/a/c/d/8/600_456464248.jpeg")])
-        .buttons([builder.CardAction.imBack(session, "I clicked in the card 1", "Click me")]);
 
-    var card2 = new builder.HeroCard(session)
-        .title("Card 2")
-        .subtitle("This is the second card.")
-        .text("Hello cards!")
-        .images([builder.CardImage.create(session, "https://tctechcrunch2011.files.wordpress.com/2016/04/facebook-chatbots.png?w=738")])
-        .buttons([builder.CardAction.imBack(session, "I clicked in the card 2", "Click me")]);
+    var cardsArray = [];
 
-    var messageWithCarousel = new builder.Message(session);
-    messageWithCarousel.attachmentLayout(builder.AttachmentLayout.carousel)
-    messageWithCarousel.attachments([
-        card1,
-        card2
-    ]);
+    for (var i = 0; i < 5; i++) {
+        var cardIndex = i + 1;
+
+        var card = new builder.HeroCard(session)
+            .title("Card " + cardIndex)
+            .subtitle("This is an awesome card.")
+            .text("Hello cards!")
+            .images([builder.CardImage.create(session, "https://secure.meetupstatic.com/photos/event/a/c/d/8/600_456464248.jpeg")])
+            .buttons([builder.CardAction.imBack(session, "I clicked in the card " + cardIndex, "Click me")]);
+
+        cardsArray.push(card);
+    }
+
+    var messageWithCarousel = new builder.Message(session)
+        .attachmentLayout(builder.AttachmentLayout.carousel)
+        .attachments(cardsArray);
 
     session.send(messageWithCarousel);
 
     // Sending Suggested actions
     // More information here: https://docs.microsoft.com/en-us/bot-framework/nodejs/bot-builder-nodejs-send-suggested-actions
-    var msg = new builder.Message(session)
+    var colorsSuggestedActions = builder.SuggestedActions.create(
+        session, [
+            builder.CardAction.imBack(session, "green", "Green"),
+            builder.CardAction.imBack(session, "blue", "Blue"),
+            builder.CardAction.imBack(session, "red", "Red")
+        ]
+    );
+
+    var messageWithSuggestedActions = new builder.Message(session)
         .text("What is the color that you like the most?")
-        .suggestedActions(
-        builder.SuggestedActions.create(
-            session, [
-                builder.CardAction.imBack(session, "green", "Green"),
-                builder.CardAction.imBack(session, "blue", "Blue"),
-                builder.CardAction.imBack(session, "red", "Red")
-            ]
-        ));
-    session.send(msg);
+        .suggestedActions(colorsSuggestedActions);
+
+    session.send(messageWithSuggestedActions);
 
     // Sending the "typing indicator" and stopping it after 3 seconds.
     // More information here: https://docs.microsoft.com/en-us/bot-framework/nodejs/bot-builder-nodejs-send-typing-indicator
