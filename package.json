@@ -6,6 +6,7 @@
   "license": "ISC",
   "dependencies": {
     "botbuilder": "^3.9.1",
+    "giphy-api": "^1.2.7",
     "restify": "^5.2.0"
   }
 }
